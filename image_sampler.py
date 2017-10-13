@@ -59,7 +59,7 @@ def load_image(path, target_size=None, color_mode='rgb'):
     image_array = normalize(image_array)
 
     if color_mode in ['grayscale', 'gray']:
-        image_array = image_array.reshape(image.size[0], image.size[1], 1)
+        image_array = image_array.reshape(image.size[1], image.size[0], 1)
     return image_array
 
 

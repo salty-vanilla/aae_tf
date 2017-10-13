@@ -45,7 +45,7 @@ class AdversarialAutoEncoder:
                 self.opt_en = tf.train.AdamOptimizer(learning_rate=1e-3, beta1=0.5). \
                     minimize(self.loss_en, var_list=self.autoencoder.encoder_vars)
 
-        self.saver = tf.train.Saver()
+        self.saver = tf.train.Saver(max_to_keep=None)
         self.sess = tf.Session()
         self.sess.run(tf.global_variables_initializer())
         tf.summary.FileWriter('../logs', graph=self.sess.graph)
