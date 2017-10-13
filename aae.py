@@ -133,6 +133,20 @@ class AdversarialAutoEncoder:
         return self.sess.run(self.decode,
                              feed_dict={self.image: x})
 
+    def predict_latent_vectors(self, x, batch_size=16):
+        outputs = np.empty([0, self.latent_dim])
+        steps_per_epoch = len(x) // batch_size if len(x) % batch_size == 0 \
+            else len(x) // batch_size + 1
+        for iter_ in range(steps_per_epoch):
+            x_batch = x[iter_ * batch_size: (iter_ + 1) * batch_size]
+            o = self.predict_latent_vectors_on_batch(x_batch)
+            outputs = np.append(outputs, o, axis=0)
+        return outputs
+
+    def predict_latent_vectors_on_batch(self, x):
+        return self.sess.run(self.encode,
+                             feed_dict={self.image: x})
+
     def visualize(self, dst_dir, image_batch, convert_function):
         decoded_data = self.predict_on_batch(image_batch)
         decoded_images = convert_function(decoded_data)
