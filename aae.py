@@ -133,6 +133,21 @@ class AdversarialAutoEncoder:
         return self.sess.run(self.decode,
                              feed_dict={self.image: x})
 
+    def predict_latent_vectors_generator(self, image_sampler):
+        outputs = np.empty([0, self.latent_dim])
+        batch_size = image_sampler.batch_size
+        nb_sample = image_sampler.nb_sample
+
+        # calc steps_per_epoch
+        steps_per_epoch = nb_sample // batch_size
+        if nb_sample % batch_size != 0:
+            steps_per_epoch += 1
+
+        for x_batch in image_sampler():
+            o = self.predict_latent_vectors_on_batch(x_batch)
+            outputs = np.append(outputs, o, axis=0)
+        return outputs
+
     def predict_latent_vectors(self, x, batch_size=16):
         outputs = np.empty([0, self.latent_dim])
         steps_per_epoch = len(x) // batch_size if len(x) % batch_size == 0 \

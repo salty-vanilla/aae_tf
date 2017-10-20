@@ -1,42 +1,21 @@
 import os
 import sys
 import argparse
-import pickle
-import gzip
-import numpy as np
 import pandas as pd
-from PIL import Image
 import matplotlib
 matplotlib.use('agg')
 sys.path.append(os.getcwd())
 import seaborn as sns
 import matplotlib.pyplot as plt
 from aae import AdversarialAutoEncoder as AAE
+from image_sampler import ImageSampler
 from mnist.autoencoder import AutoEncoder
 from mnist.discriminator import Discriminator
-
-
-def load_mnist_test(file_path, target_size=None):
-    f = gzip.open(file_path)
-    (train_x, _), (valid_x, _), (test_x, test_y) = pickle.load(f, encoding='latin1')
-
-    test_images = [Image.fromarray(x.reshape(28, 28)) for x in test_x]
-
-    if target_size is not None and target_size != (28, 28):
-        test_images = [x.resize(target_size, Image.BILINEAR)
-                       for x in test_images]
-    test_x = np.array([np.asarray(x) for x in test_images])
-    test_x = test_x.reshape(len(test_x), target_size[0], target_size[1], 1)
-    return test_x, test_y
-
-
-def plot_scatter():
-    pass
+from mnist.dataset import load_mnist
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('mnist_path', type=str)
     parser.add_argument('--batch_size', '-bs', type=int, default=64)
     parser.add_argument('--latent_dim', '-ld', type=int, default=2)
     parser.add_argument('--height', '-ht', type=int, default=32)
@@ -58,9 +37,11 @@ def main():
     aae = AAE(autoencoder, discriminator, is_training=False)
     aae.restore(args.model_path)
 
-    test_x, test_y = load_mnist_test(args.mnist_path,
-                                     (input_shape[1], input_shape[0]))
-    encoded = aae.predict_latent_vectors(test_x)
+    test_x, test_y = load_mnist(mode='test')
+    image_sampler = ImageSampler(target_size=(args.width, args.height),
+                                 color_mode='rgb' if args.channel == 3 else 'gray',
+                                 is_training=False)
+    encoded = aae.predict_latent_vectors_generator(image_sampler.flow(test_x, shuffle=False))
 
     df = pd.DataFrame({'z_1': encoded[:, 0],
                        'z_2': encoded[:, 1],

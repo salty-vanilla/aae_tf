@@ -112,7 +112,8 @@ class ArrayIterator(Iterator):
     def flow_on_training(self):
         with self.lock:
             index_array, current_index, current_batch_size = next(self.index_generator)
-        image_batch = np.array([preprocessing(Image.fromarray(x), color_mode=self.color_mode,
+        image_batch = np.array([preprocessing(Image.fromarray(x),
+                                              color_mode=self.color_mode,
                                               target_size=self.target_size)
                                 for x in self.x[index_array]])
         if self.y is not None:
@@ -132,9 +133,10 @@ class ArrayIterator(Iterator):
             steps += 1
         for i in range(steps):
             index_array = indexes[i * self.batch_size: (i + 1) * self.batch_size]
-            image_batch = np.array([preprocessing(image, color_mode=self.color_mode,
+            image_batch = np.array([preprocessing(Image.fromarray(x),
+                                                  color_mode=self.color_mode,
                                                   target_size=self.target_size)
-                                    for image in self.x[index_array]])
+                                    for x in self.x[index_array]])
             if self.y is not None:
                 label_batch = self.y[index_array]
                 yield image_batch, label_batch

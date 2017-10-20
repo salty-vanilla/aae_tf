@@ -1,8 +1,6 @@
 import os
 import sys
 import argparse
-import gzip
-import pickle
 sys.path.append(os.getcwd())
 from aae import AdversarialAutoEncoder as AAE
 from image_sampler import ImageSampler
@@ -10,19 +8,11 @@ from noise_sampler import NoiseSampler
 from utils.config import dump_config
 from mnist.autoencoder import AutoEncoder
 from mnist.discriminator import Discriminator
-
-
-def load_mnist_train(file_path):
-    f = gzip.open(file_path)
-    (train_x, _), (_, _), (_, _) = pickle.load(f, encoding='latin1')
-    train_x = train_x.reshape(len(train_x), 28, 28, 1)
-    train_x = (train_x * 255).astype('uint8')
-    return train_x
+from mnist.dataset import load_mnist
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('mnist_path', type=str)
     parser.add_argument('--batch_size', '-bs', type=int, default=64)
     parser.add_argument('--nb_epoch', '-e', type=int, default=1000)
     parser.add_argument('--latent_dim', '-ld', type=int, default=2)
@@ -55,7 +45,8 @@ def main():
 
     aae = AAE(autoencoder, discriminator, is_training=True)
 
-    aae.fit_generator(image_sampler.flow(load_mnist_train(args.mnist_path),
+    train_x, _ = load_mnist(mode='training')
+    aae.fit_generator(image_sampler.flow(train_x,
                                          batch_size=args.batch_size),
                       noise_sampler, nb_epoch=args.nb_epoch,
                       save_steps=args.save_steps, visualize_steps=args.visualize_steps,
