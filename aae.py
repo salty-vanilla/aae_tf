@@ -88,6 +88,8 @@ class AdversarialAutoEncoder:
                 _, loss_en = self.sess.run([self.opt_en, self.loss_en],
                                            feed_dict={self.image: image_batch})
 
+                writer.writerow([loss_ae, loss_en, loss_d])
+                
                 print('iter : {} / {}  {:.1f}[s]  loss_mse : {:.4f}  loss_d : {:.4f}  loss_en : {:.4f}\r'
                       .format(iter_, steps_per_epoch, time.time() - start, loss_ae, loss_d, loss_en),
                       end='')
