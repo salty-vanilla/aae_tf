@@ -17,3 +17,5 @@ MNIST to Normal(0, 1)
 ### generate
 #### mnist
 `python mnist/generate.py`
+
+hello
